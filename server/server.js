@@ -8,7 +8,6 @@ var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 
 
-
 var app = express();
 const port = process.env.PORT || 3000;
 
@@ -26,6 +25,8 @@ app.post('/todos', function(req, res){
   });
 });
 
+
+
 app.get('/todos', function(req, res){
   Todo.find().then(function(todos){
     res.send({todos});
@@ -34,20 +35,19 @@ app.get('/todos', function(req, res){
   });
 });
 
+
+
 // GET /todos/1234324
 app.get('/todos/:id', function(req, res){
   var id = req.params.id;
-
   // Valid id using isValid
+
     //404 - send back empty send
+
     if(!ObjectID.isValid(id)){
       return res.status(404).send();
     }
 
-  // findById
-    // success
-      // if todo - send it back
-      // if no todo - send back 404 with empty body
 
   Todo.findById(id).then(function(todo){
     if(!todo){
@@ -59,11 +59,11 @@ app.get('/todos/:id', function(req, res){
   }).catch(function(e){
     res.status(400).send();
   });
+
 });
 
 
 app.delete('/todos/:id', function(req, res){
-
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
@@ -74,15 +74,16 @@ app.delete('/todos/:id', function(req, res){
         if(!todo){
           return res.status(404).send();
         }
-
         res.send({todo});
       }).catch(function(e){
         res.status(400).send();
       });
-
 });
 
+
+
 app.patch('/todos/:id', function(req, res){
+
   var id = req.params.id;
   var body = _.pick(req.body, ['text', 'completed']);
 
@@ -99,11 +100,12 @@ app.patch('/todos/:id', function(req, res){
     body.completedAt = null;
   }
 
+
+
   Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then(function(todo){
     if(!todo){
       return res.status(404).send();
     }
-
     res.send({todo});
   }).catch(function(e){
     res.status(400).send();
@@ -113,9 +115,37 @@ app.patch('/todos/:id', function(req, res){
 });
 
 
+// POST /users  //use pick method
+
+app.post('/users', function(req, res){
+  var user = new User(_.pick(req.body, ['email', 'password']));
+
+  user.save().then(function(){
+    return user.generateAuthToken();
+    //res.send(user);
+  }).then(function(token){
+    res.header('x-auth', token).send(user);
+  }).catch(function(e){
+    res.status(400).send(e);
+  });
+});
+
+
+// app.post('/todos', function(req, res){
+//   var todo = new Todo({
+//     text: req.body.text
+//   });
+//
+//   todo.save().then(function(doc){
+//     res.send(doc);
+//   }, function(e){
+//     res.status(400).send(e);
+//   });
+// });
+
+
 app.listen(port, function(){
   console.log('Started up at port' + port);
 });
-
 
 module.exports = {app};

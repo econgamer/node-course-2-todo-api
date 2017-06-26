@@ -6,6 +6,7 @@ const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
+var {authenticate} = require('./middleware/authenticate');
 
 
 var app = express();
@@ -118,7 +119,10 @@ app.patch('/todos/:id', function(req, res){
 // POST /users  //use pick method
 
 app.post('/users', function(req, res){
-  var user = new User(_.pick(req.body, ['email', 'password']));
+  var body = _.pick(req.body, ['email', 'password']);
+  var user = new User(body);
+
+
 
   user.save().then(function(){
     return user.generateAuthToken();
@@ -131,18 +135,10 @@ app.post('/users', function(req, res){
 });
 
 
-// app.post('/todos', function(req, res){
-//   var todo = new Todo({
-//     text: req.body.text
-//   });
-//
-//   todo.save().then(function(doc){
-//     res.send(doc);
-//   }, function(e){
-//     res.status(400).send(e);
-//   });
-// });
 
+app.get('/users/me', authenticate, function(req, res){
+  res.send(req.user);
+});
 
 app.listen(port, function(){
   console.log('Started up at port' + port);

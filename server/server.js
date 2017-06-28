@@ -124,8 +124,6 @@ app.post('/users', function(req, res){
   var body = _.pick(req.body, ['email', 'password']);
   var user = new User(body);
 
-
-
   user.save().then(function(){
     return user.generateAuthToken();
     //res.send(user);
@@ -141,6 +139,25 @@ app.post('/users', function(req, res){
 app.get('/users/me', authenticate, function(req, res){
   res.send(req.user);
 });
+
+
+// POST /users/login {email, password}
+
+app.post('/users/login', function(req, res){
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then(function(user){
+    return user.generateAuthToken().then(function(token){
+      res.header('x-auth', token).send(user);
+    });
+
+  }).catch(function(e){
+    res.status(400).send();
+  });
+
+
+});
+
 
 app.listen(port, function(){
   console.log('Started up at port' + port);

@@ -142,7 +142,6 @@ app.get('/users/me', authenticate, function(req, res){
 
 
 // POST /users/login {email, password}
-
 app.post('/users/login', function(req, res){
   var body = _.pick(req.body, ['email', 'password']);
 
@@ -154,7 +153,6 @@ app.post('/users/login', function(req, res){
   }).catch(function(e){
     res.status(400).send();
   });
-
 
 });
 
